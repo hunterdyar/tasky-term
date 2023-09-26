@@ -1,0 +1,36 @@
+Task {
+    layout: horizontal;
+    background: $boost;
+    height: 3;
+    margin: 0;
+    min-width: 50;
+    padding: 0;
+}
+
+TaskText {
+    content-align: center middle;
+    text-opacity: 100%;
+    height: auto;
+}
+
+Button {
+    width: 16;
+    height: auto;
+    padding: 0;
+}
+
+#t-complete {
+    dock: left;
+}
+
+#stop {
+    dock: left;
+    display: none;
+}
+
+#reset {
+    dock: right;
+}
+.complete TaskText{
+    text-opacity: 60%
+}
