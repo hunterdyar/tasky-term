@@ -39,7 +39,7 @@ class TaskyTerm(App):
         """Create child widgets for the app."""
         yield Header()
         yield Footer()
-        yield ScrollableContainer(Task(), Task(), Task(), id="tasklist")
+        yield ScrollableContainer(id="tasklist")
 
     def action_new_task(self) -> None:
         new_task = Task()

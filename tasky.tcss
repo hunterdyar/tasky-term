@@ -32,5 +32,6 @@ Button {
     dock: right;
 }
 .complete TaskText{
-    text-opacity: 60%
+    text-opacity: 60%;
+    text-style: strike;
 }
