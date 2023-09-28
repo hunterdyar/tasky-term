@@ -2,7 +2,8 @@ from itertools import cycle
 from pathlib import Path
 from sys import argv
 
-from markdown_it import MarkdownIt
+import mistune
+from mistune import renderers
 from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.coordinate import Coordinate
@@ -24,7 +25,7 @@ ROWS = [
 
 class TableApp(App):
     path = "demo.md"
-    md = MarkdownIt()
+    md = mistune.create_markdown(renderer=None)
     tokens = None
     table = None
     complete_col_key = "complete"
@@ -55,6 +56,8 @@ class TableApp(App):
             data = f.read()
             self.tokens = self.md.parse(data)
             liopen = False
+
+            # this is for markdown-it but mistune has both AST and markdown renderer, so we need to change. it's tree is an actual tree, so this all has to go.
             for token in self.tokens:
                 if token.type == 'list_item_open':
                     liopen = True
