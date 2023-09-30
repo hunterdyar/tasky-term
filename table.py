@@ -1,20 +1,36 @@
 from itertools import cycle
 from pathlib import Path
 from sys import argv
-from typing import Dict, Any
 import mistune
 from mistune import BlockState
 from mistune.renderers.markdown import MarkdownRenderer
 from mistune.util import strip_end
 from rich.text import Text
 from textual.app import App, ComposeResult
+from textual.binding import Binding
 from textual.coordinate import Coordinate
 from textual.reactive import var
-from textual.widgets import DataTable
-import md_task_lists
+from textual.widgets import DataTable, Footer
+from textual.widgets._data_table import CellDoesNotExist
 
+import md_task_lists
+import TasklistMarkdownRenderer
 
 class TableApp(App):
+    BINDINGS = [
+        Binding(key="q", action="quit", description="Quit the app"),
+        Binding(
+            key="question_mark",
+            action="help",
+            description="Show help screen",
+            key_display="?",
+        ),
+        Binding(key="n", action="new_task", description="New Task"),
+        Binding(key="d", action="delete", description="Delete Task"),
+        Binding(key="space", action="toggle", description="Mark", show=True),
+        Binding(key="j", action="down", description="Scroll down", show=False),
+        Binding(key="k", action="up", description="Scroll up", show=False),
+    ]
     path = "demo.md"
     md = mistune.create_markdown(renderer=None, plugins=['task_lists'])
     # mistune.import_plugin('md_task_lists.md_task_lists')
@@ -26,6 +42,7 @@ class TableApp(App):
 
     def compose(self) -> ComposeResult:
         yield DataTable()
+        yield Footer()
 
     def on_mount(self) -> None:
         self.table = self.query_one(DataTable)
@@ -76,7 +93,7 @@ class TableApp(App):
     def save(self):
         print("save")
         with open(self.path, 'w', encoding="utf-8") as f:
-            r = TaskListMarkdownRenderer()
+            r = TasklistMarkdownRenderer.TaskListMarkdownRenderer()
             # this isn't working
             r.register('task_list_item', md_task_lists.md_render_task_list_item)
 
@@ -96,7 +113,6 @@ class TableApp(App):
         e = self.row_to_element[row_key]
         # you ever write code that you just _feel_ is wrong? in your bones?
         e['parent']['children'].remove(e)
-
 
     def get_first_list(self, tokens):
         if isinstance(tokens, list):
@@ -141,15 +157,19 @@ class TableApp(App):
         key = self.table.add_row(*r)
         self.row_to_element[key] = token
 
-    def key_n(self):
+    def action_new_task(self):
         self.create_task()
         self.save()
 
-    def key_c(self):
+    def action_down(self):
         table = self.table
         table.move_cursor(row=table.cursor_row + 1, animate=False)
 
-    def key_space(self):
+    def action_up(self):
+        table = self.table
+        table.move_cursor(row=table.cursor_row - 1, animate=False)
+
+    def action_toggle(self):
         table = self.table
         row = self.selected_row()
         if table.row_count == 0:
@@ -160,10 +180,16 @@ class TableApp(App):
         self.row_to_element[row]['attrs']['checked'] = checked
         self.save()
 
-    def key_d(self):
+    def action_delete(self):
         table = self.table
-        row_key, _ = table.coordinate_to_cell_key(table.cursor_coordinate)
-        self.delete_task(row_key)
+        try:
+            row_key, _ = table.coordinate_to_cell_key(table.cursor_coordinate)
+            self.delete_task(row_key)
+            self.save()
+        except CellDoesNotExist:
+            # Can't delete no thing... this is fine tho.
+            # It feels gross to catch this in error instead of checking it before calling.
+            pass
 
     def selected_row(self):
         table = self.query_one(DataTable)
@@ -175,83 +201,6 @@ class TableApp(App):
 
 
 # largely takes the code from the _list.py file, which skips calling on list_items (so skips task list items), and injects that bit.
-class TaskListMarkdownRenderer(MarkdownRenderer):
-    def render_token(self, token, state):
-        print('render token: ' + token['type'])
-        func = self._get_method(token['type'])
-        # hack workaround for register not working?
-        if token['type'] == 'task_list_item':
-            func = self.render_task_list_item
-
-        return func(token, state)
-
-    def render_task_list_item(self, token: Dict[str, Any], state: BlockState) -> str:
-        print("Render task list item remarkdown")
-        check = "[x]" if token.get('attrs').get('checked') else "[ ]"
-        return check + " " + self.render_children(token, state)
-
-    def list(self, token: Dict[str, Any], state: BlockState) -> str:
-        return self.render_list(token, state)
-
-    def render_list(self, token, state) -> str:
-        attrs = token['attrs']
-        if attrs['ordered']:
-            children = self._render_ordered_list(token, state)
-        else:
-            children = self._render_unordered_list(token, state)
-
-        text = ''.join(children)
-        parent = token.get('parent')
-        if parent:
-            if parent['tight']:
-                return text
-            return text + '\n'
-        return strip_end(text) + '\n'
-
-    def _render_list_item(self, parent, item, state):
-        leading = parent['leading']
-        text = ''
-
-        if item['type'] == 'task_list_item':
-            check = "[x] " if item['attrs'].get('checked') else "[ ] "
-            text += check
-
-        for tok in item['children']:
-            if tok['type'] == 'list':
-                tok['parent'] = parent
-            elif tok['type'] == 'blank_line':
-                continue
-            text += self.render_token(tok, state)
-
-        lines = text.splitlines()
-        text = (lines[0] if lines else '') + '\n'
-        prefix = ' ' * len(leading)
-        for line in lines[1:]:
-            if line:
-                text += prefix + line + '\n'
-            else:
-                text += '\n'
-        return leading + text
-
-    def _render_ordered_list(self, token, state):
-        attrs = token['attrs']
-        start = attrs.get('start', 1)
-        for item in token['children']:
-            leading = str(start) + token['bullet'] + ' '
-            parent = {
-                'leading': leading,
-                'tight': token['tight'],
-            }
-            yield self._render_list_item(parent, item, state)
-            start += 1
-
-    def _render_unordered_list(self, token, state):
-        parent = {
-            'leading': token['bullet'] + ' ',
-            'tight': token['tight'],
-        }
-        for item in token['children']:
-            yield self._render_list_item(parent, item, state)
 
 
 app = TableApp()
