@@ -5,7 +5,6 @@ from mistune import BlockState
 
 class TaskListMarkdownRenderer(MarkdownRenderer):
     def render_token(self, token, state):
-        print('render token: ' + token['type'])
         func = self._get_method(token['type'])
         # hack workaround for register not working?
         if token['type'] == 'task_list_item':
@@ -14,7 +13,6 @@ class TaskListMarkdownRenderer(MarkdownRenderer):
         return func(token, state)
 
     def render_task_list_item(self, token: Dict[str, Any], state: BlockState) -> str:
-        print("Render task list item remarkdown")
         check = "[x]" if token.get('attrs').get('checked') else "[ ]"
         return check + " " + self.render_children(token, state)
 

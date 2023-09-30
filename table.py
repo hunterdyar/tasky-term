@@ -4,30 +4,22 @@ from sys import argv
 import mistune
 from mistune import BlockState
 from mistune.renderers.markdown import MarkdownRenderer
-from mistune.util import strip_end
 from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.coordinate import Coordinate
-from textual.reactive import var
 from textual.widgets import DataTable, Footer
 from textual.widgets._data_table import CellDoesNotExist
 
 import md_task_lists
 import TasklistMarkdownRenderer
 
+
 class TableApp(App):
     BINDINGS = [
-        Binding(key="q", action="quit", description="Quit the app"),
-        Binding(
-            key="question_mark",
-            action="help",
-            description="Show help screen",
-            key_display="?",
-        ),
-        Binding(key="n", action="new_task", description="New Task"),
-        Binding(key="d", action="delete", description="Delete Task"),
-        Binding(key="space", action="toggle", description="Mark", show=True),
+        Binding(key="q", action="exit", description="Quit"),
+        Binding(key="n", action="new_task", description="New"),
+        Binding(key="d", action="delete", description="Delete"),
+        Binding(key="space", action="toggle", description="Check", show=True, key_display='_'),
         Binding(key="j", action="down", description="Scroll down", show=False),
         Binding(key="k", action="up", description="Scroll up", show=False),
     ]
@@ -62,7 +54,7 @@ class TableApp(App):
                 self.find_tasks_recursive(each_element, parent=element)
             return
 
-        #While walking the tree, we store a reference to the parent.
+        # While walking the tree, we store a reference to the parent.
 
         if element['type'] == 'task_list_item':
             element['parent'] = parent
@@ -150,6 +142,7 @@ class TableApp(App):
                  'attrs': {'checked': False}, 'parent': l}
         l['children'].append(token)
 
+        # todo: handle style and checkmark cell classes. THis will let us handle mouse input on the check.
         r = [
             False,
             Text(str(text), style="#cccccc", justify="left")
@@ -190,6 +183,11 @@ class TableApp(App):
             # Can't delete no thing... this is fine tho.
             # It feels gross to catch this in error instead of checking it before calling.
             pass
+
+    def action_exit(self):
+        print("goodbye")
+        self.save()
+        quit()
 
     def selected_row(self):
         table = self.query_one(DataTable)
