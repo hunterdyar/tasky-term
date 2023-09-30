@@ -44,8 +44,6 @@ class Task(Static):
 
 
 class TaskyTerm(App):
-    """A Textual app to manage stopwatches."""
-
     selected = 0
 
     CSS_PATH = "tasky.tcss"

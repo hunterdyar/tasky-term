@@ -7,17 +7,29 @@ from mistune.renderers.markdown import MarkdownRenderer
 from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.widgets import DataTable, Footer
+from textual.widgets import DataTable, Footer, Input, RichLog
 from textual.widgets._data_table import CellDoesNotExist
 
 import md_task_lists
 import TasklistMarkdownRenderer
 
 
+class TaskText(RichLog):
+    row_key = ""
+    def __init__(self, task_text):
+        super().__init__()
+        self.text = task_text
+
+    def on_mount(self) -> None:
+        self.style = "#cccccc"
+        self.justify = "left"
+        self.max_lines = 1
+
 class TableApp(App):
     BINDINGS = [
         Binding(key="q", action="exit", description="Quit"),
         Binding(key="n", action="new_task", description="New"),
+        Binding(key="e", action="edit", description="Edit"),
         Binding(key="d", action="delete", description="Delete"),
         Binding(key="space", action="toggle", description="Check", show=True, key_display='_'),
         Binding(key="j", action="down", description="Scroll down", show=False),
@@ -29,6 +41,7 @@ class TableApp(App):
     md_render = mistune.create_markdown(renderer=MarkdownRenderer)
     tokens = None
     table = None
+    task_col_key = "tasks"
     complete_col_key = "complete"
     row_to_element = {}
 
@@ -45,7 +58,7 @@ class TableApp(App):
 
     def add_title_columns(self):
         self.table.add_column("X", width=3, key=self.complete_col_key)
-        self.table.add_column(Text("Task", justify="center"))  # centers the label 'task'.
+        self.table.add_column(Text("Task", justify="center"), key=self.task_col_key)  # centers the label 'task'.
 
     def find_tasks_recursive(self, element, parent=None):
         # we gottta go deeper
@@ -58,11 +71,13 @@ class TableApp(App):
 
         if element['type'] == 'task_list_item':
             element['parent'] = parent
+            tt = TaskText(str(element['children'][0]['children'][0]['raw']))
             styled_row = [
                 element['attrs']['checked'],
-                Text(str(element['children'][0]['children'][0]['raw']), style="#cccccc", justify="left")
+                tt
             ]
             key = self.table.add_row(*styled_row)
+            tt.row_key = key
             self.row_to_element[key] = element
 
         if element['type'] == 'list':
@@ -86,16 +101,11 @@ class TableApp(App):
         print("save")
         with open(self.path, 'w', encoding="utf-8") as f:
             r = TasklistMarkdownRenderer.TaskListMarkdownRenderer()
-            # this isn't working
+
+            # this ... might do nothing?
             r.register('task_list_item', md_task_lists.md_render_task_list_item)
 
-            # md_task_lists.md_task_token_process(self.tokens)
-
-            # m = self.tokens[0][3]['children'][0]['type']+"\n\n"
-            # = renderer.render_token(self.tokens[0][3]['children'][0], state=BlockState())
-
             m = r.render_tokens(self.tokens, BlockState())
-            # m = renderer(self.tokens[0], state=BlockState())
             f.write(m)
             f.close()
 
@@ -118,8 +128,8 @@ class TableApp(App):
             elif 'children' in tokens:
                 for tok in tokens['children']:
                     l = self.get_first_list(tok)
-                    if l != None:
-                        return l
+                    if l is not None:
+                        return
                     else:
                         return None
         return None
@@ -145,10 +155,14 @@ class TableApp(App):
         # todo: handle style and checkmark cell classes. THis will let us handle mouse input on the check.
         r = [
             False,
-            Text(str(text), style="#cccccc", justify="left")
+            TaskText(str(text))
         ]
         key = self.table.add_row(*r)
         self.row_to_element[key] = token
+
+    def toggle_edit(self, rowkey):
+        cell = self.table.get_cell(rowkey, self.task_col_key)
+        cell.edit()
 
     def action_new_task(self):
         self.create_task()
@@ -182,6 +196,14 @@ class TableApp(App):
         except CellDoesNotExist:
             # Can't delete no thing... this is fine tho.
             # It feels gross to catch this in error instead of checking it before calling.
+            pass
+
+    def action_edit(self):
+        table = self.table
+        try:
+            row_key, _ = table.coordinate_to_cell_key(table.cursor_coordinate)
+            self.toggle_edit(row_key)
+        except CellDoesNotExist:
             pass
 
     def action_exit(self):
