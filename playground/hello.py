@@ -4,7 +4,7 @@ import sys
 from argparse import ArgumentParser, Namespace
 
 import pytermgui as ptg
-from taskWidget import Task
+from playground.taskWidget import Task
 
 def _process_arguments(argv: list[str] | None = None) -> Namespace:
     """Processes command line arguments.

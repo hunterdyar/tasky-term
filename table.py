@@ -1,4 +1,3 @@
-from itertools import cycle
 from pathlib import Path
 from sys import argv
 import mistune
@@ -7,7 +6,7 @@ from mistune.renderers.markdown import MarkdownRenderer
 from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.widgets import DataTable, Footer, Input, RichLog
+from textual.widgets import DataTable, Footer, RichLog
 from textual.widgets._data_table import CellDoesNotExist
 
 import md_task_lists
@@ -111,7 +110,7 @@ class TableApp(App):
 
     def delete_task(self, row_key):
         # todo if is row key
-        self.table.remove_row(row_key)
+        self.table.remove_row()
         e = self.row_to_element[row_key]
         # you ever write code that you just _feel_ is wrong? in your bones?
         e['parent']['children'].remove(e)
@@ -153,9 +152,12 @@ class TableApp(App):
         l['children'].append(token)
 
         # todo: handle style and checkmark cell classes. THis will let us handle mouse input on the check.
+        tt = TaskText()
+        tt.text = str(text)
+        tt.complete = False
         r = [
             False,
-            TaskText(str(text))
+            tt
         ]
         key = self.table.add_row(*r)
         self.row_to_element[key] = token
