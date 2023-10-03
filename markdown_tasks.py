@@ -16,8 +16,20 @@ def get_md_item_from_line(parent,line):
 
     return mdItem(parent, line)
 
+def create_task(list,completed,text):
+    t = mdTask(list,text)
+    t.text = text
+    t.complete = completed
+    t.parent = list
+    return t
+
 class MDList:
+    # items is sorted
     items = []
+
+    # quick reference, presumed unsorted
+    categories = []
+
     path = ""
 
     def populate_from_file(self, path):
@@ -27,8 +39,40 @@ class MDList:
             self.items.clear()
             data = f.read().splitlines()
             for line in data:
-                #todo: get rid of .strip after regex so we can keep leading whitespace.
-                self.items.append(get_md_item_from_line(self, line.strip()))
+                item = get_md_item_from_line(self, line.strip())
+                # this could be a filter later? I want LINQ
+                if item is mdHeader:
+                    self.categories.append(item)
+
+                self.items.append(item)
+
+    def get_tasks(self):
+        return list(filter(lambda x: x is mdTask, self.items))
+
+    def insert_task_after_item(self,prevItem,completed,task):
+        index = self.items.index(prevItem)+1
+        new_task = create_task(self,completed,task)
+        self.items.insert(index,new_task)
+        return new_task
+    # todo: insert at end of category.
+        # loop through items until category is full
+        # x = i if i is task; until end of file or next category
+
+    def add_task(self,completed,text):
+        # todo: replace with quicker iteration from end of list
+        if len(self.items) == 0:
+            new_task = create_task(self, completed, text)
+            self.items.append(new_task)
+            return new_task
+
+        # default to adding at end of list
+        last_task = self.items[-1]
+
+        tasks = self.get_tasks()
+        if len(tasks) != 0:
+            last_task = tasks[-1]
+        return self.insert_task_after_item(last_task, completed, text)
+
 
     def write_to_file(self, path):
         with open(self.path, 'w', encoding="utf-8") as f:
@@ -67,7 +111,7 @@ class mdHeader(mdItem):
         self.text = source_line[heading:].strip()
 
     def renderLine(self):
-        print("render heading "+str(self.heading))
+        print("render heading "+str(self.heading) +": "+self.text)
         t = "#" * self.heading
         t += " "+self.text
         return t
@@ -104,5 +148,5 @@ if __name__ == "__main__":
     else:
         path = sys.argv[1]
     mdlist.populate_from_file(path)
-   # mdlist.items.append(md_item("An extra line!"))
+    mdlist.add_task(False,"A new todo! From the file!")
     mdlist.write_to_file(path)

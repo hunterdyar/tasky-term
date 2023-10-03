@@ -6,9 +6,7 @@
 ## category Two
 
 ## category Three
-
-## #
-
-
-An extra line!
-An extra line!
+- [x] todo! From the file!
+- [ ] A new todo! From the file!
+- [ ] A new todo! From the file!
+- [ ] A new todo! From the file!

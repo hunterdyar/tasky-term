@@ -1,5 +1,3 @@
-import mistune
-from mistune import BlockState
 from textual import on, events
 from textual.app import App, ComposeResult
 from textual.binding import Binding
@@ -7,12 +5,7 @@ from textual.containers import ScrollableContainer
 from textual.events import DescendantBlur
 from textual.widgets import Header, Footer, Button, Static, Input
 from textual.reactive import reactive
-from mistune.renderers.markdown import MarkdownRenderer
-
-import TasklistMarkdownRenderer
-import md_task_lists
-
-
+import markdown_tasks
 class TaskText(Input):
     """text"""
     @on(Input.Changed)
@@ -69,8 +62,7 @@ class TaskyTerm(App):
         Binding(key="k", action="up", description="Scroll up", show=False),
     ]
     selected = 0
-    md = mistune.create_markdown(renderer=None, plugins=['task_lists'])
-    md_render = mistune.create_markdown(renderer=MarkdownRenderer)
+    md = markdown_tasks.MDList()
     tokens = None
     path = "demo.md"
 
@@ -81,48 +73,12 @@ class TaskyTerm(App):
         yield ScrollableContainer(id="tasklist")
 
     def on_mount(self) -> None:
-        self.set_tasks_from_file()
-
-    def find_tasks_recursive(self, element, parent=None):
-        if isinstance(element, list):
-            for each_element in element:
-                self.find_tasks_recursive(each_element, parent=element)
-            return
-
-        # While walking the tree, we store a reference to the parent.
-
-        if element['type'] == 'task_list_item':
-            element['parent'] = parent
-            tt = Task()
-            tt.checked = element['attrs']['checked']
-            tt.text = str(element['children'][0]['children'][0]['raw'])
-            self.query_one("#tasklist").mount(tt)
-
-        if element['type'] == 'list':
-            for child in element['children']:
-                self.find_tasks_recursive(child, parent=element)
-
-    def set_tasks_from_file(self):
-        with open(self.path, encoding="utf-8") as f:
-            self.clear()
-            data = f.read()
-            self.tokens = self.md.parse(data)[0]
-            self.find_tasks_recursive(self.tokens)
-
-    def save(self):
-        print("save")
-        with open(self.path, 'w', encoding="utf-8") as f:
-            r = TasklistMarkdownRenderer.TaskListMarkdownRenderer()
-
-            # this ... might do nothing?
-            r.register('task_list_item', md_task_lists.md_render_task_list_item)
-
-            m = r.render_tokens(self.tokens, BlockState())
-            f.write(m)
-            f.close()
+        self.md.populate_from_file(self.path)
+        for t in self.md.get_tasks():
+            Task()
 
     def action_new_task(self) -> None:
-        new_task = Task()
+        new_task = Task() # todo
         self.query_one("#tasklist").mount(new_task)
 
     def on_key(self, event: events.Key) -> None:
@@ -135,7 +91,6 @@ class TaskyTerm(App):
     def clear(self):
         # delete all tasks from #tasklist
         pass
-
 
 if __name__ == "__main__":
     app = TaskyTerm()
