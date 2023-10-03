@@ -3,6 +3,7 @@ from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import ScrollableContainer
 from textual.events import DescendantBlur
+from textual.message import Message
 from textual.widgets import Header, Footer, Button, Static, Input
 from textual.reactive import reactive
 import markdown_tasks
@@ -17,37 +18,56 @@ class TaskText(Input):
         self.blur()
 
 
-class Task(Static):
-    complete = reactive(False)
-    text = reactive(str)
+class TaskWidget(Static):
+    task = None
+
+    class IsUpdated(Message):
+        t = None
+        # nothing special.
 
     def on_mount(self):
         self.scroll_visible()
-        self.query_one("#t-complete").text = self.text
+        self.refresh_complete()
+        self.refresh_text()
+
     # I don't know if this is doing anything.
+
     @on(DescendantBlur)
     def on_descendant_blur(self, widget):
         self.blur()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "t-complete":
-            self.complete = not self.complete
-            self.add_class("complete") if self.complete else self.remove_class("complete")
+            self.task.complete = not self.task.complete
+            self.add_class("complete") if self.task.complete else self.remove_class("complete")
+            self.refresh_complete()
+            self.post_message(self.IsUpdated())
 
-    def watch_complete(self, complete: bool) -> None:
-        if self.complete:
+    def refresh_complete(self) -> None:
+        if self.task.complete:
             self.query_one("#t-complete", Button).label = "\[x]"
         else:
             self.query_one("#t-complete", Button).label = "[ ]"
 
-    def watch_text(self, text):
-        print("watch text changed")
-        #self.query_one("#t-input", TaskText).input = text
+    def refresh_text(self):
+        self.query_one("#t-input", TaskText).value = self.task.text
+
+    @on(Input.Changed,"#t-input")
+    def on_input_changed(self, m):
+        self.task.text = m.value
+
+    @on(Input.Changed,"#t-input")
+    def on_input_submitted(self, m):
+        self.post_message(self.IsUpdated())
+
 
     def compose(self) -> ComposeResult:
         yield Button("[ ]", id="t-complete", variant="primary")
         # focus on the new task once it is created, so we can just start typing.
         yield TaskText(placeholder="...start typing...", id="t-input").focus()
+
+    def set_task(self, task):
+        self.task = task
 
 
 class TaskyTerm(App):
@@ -73,13 +93,23 @@ class TaskyTerm(App):
         yield ScrollableContainer(id="tasklist")
 
     def on_mount(self) -> None:
+        # md could be stored in globals?
         self.md.populate_from_file(self.path)
+        print('mount'+str(len(self.md.get_tasks())))
         for t in self.md.get_tasks():
-            Task()
+            new_task = TaskWidget()
+            new_task.set_task(t)
+            self.query_one("#tasklist").mount(new_task)
+        self.save()
 
     def action_new_task(self) -> None:
-        new_task = Task() # todo
+        new_task = TaskWidget()
+        new_task.set_task(self.md.add_task(False,""))
         self.query_one("#tasklist").mount(new_task)
+        self.save()
+
+    def save(self):
+        self.md.write_to_file(self.path)
 
     def on_key(self, event: events.Key) -> None:
         pass
@@ -91,6 +121,10 @@ class TaskyTerm(App):
     def clear(self):
         # delete all tasks from #tasklist
         pass
+
+    def on_task_widget_is_updated(self,message: TaskWidget.IsUpdated)->None:
+        print("dirty")
+        self.save()
 
 if __name__ == "__main__":
     app = TaskyTerm()

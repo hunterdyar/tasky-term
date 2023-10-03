@@ -47,7 +47,9 @@ class MDList:
                 self.items.append(item)
 
     def get_tasks(self):
-        return list(filter(lambda x: x is mdTask, self.items))
+
+        x = list(filter(lambda x: isinstance(x,mdTask), self.items))
+        return x
 
     def insert_task_after_item(self,prevItem,completed,task):
         index = self.items.index(prevItem)+1
@@ -75,6 +77,7 @@ class MDList:
 
 
     def write_to_file(self, path):
+        print("Write to file, "+str(len(self.items))+" items")
         with open(self.path, 'w', encoding="utf-8") as f:
             t = ""
             for line in self.items:
@@ -127,8 +130,10 @@ class mdTask(mdItem):
     def __init__(self, parent, source_line):
         self.source = source_line.strip()
         self.parent = parent
-        self.text = source_line[5:].strip()
-        self.complete = source_line[3] != " "
+        if len(source_line) > 5:
+            self.text = source_line[5:].strip()
+            self.complete = source_line[3] != " "
+
 
     def renderLine(self):
         t = "- [x] " if self.complete else "- [ ] "
@@ -148,5 +153,5 @@ if __name__ == "__main__":
     else:
         path = sys.argv[1]
     mdlist.populate_from_file(path)
-    mdlist.add_task(False,"A new todo! From the file!")
+    mdlist.add_task(False, "A new todo! From the file!")
     mdlist.write_to_file(path)

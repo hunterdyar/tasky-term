@@ -1,12 +1,5 @@
-
-## category One
-- [x] a complete task
-- [ ] a complete task
-
-## category Two
-
-## category Three
-- [x] todo! From the file!
-- [ ] A new todo! From the file!
-- [ ] A new todo! From the file!
-- [ ] A new todo! From the file!
+- [x] This is a task.
+- [x] I can't wait to make this project usable.
+- [ ] Make the UI suck less.
+- [x] A new todo! From the file!
+- [x] Technically, it finally works!
