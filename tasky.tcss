@@ -19,7 +19,7 @@ TaskText:focus {
 }
 
 Button {
-    width: 4;
+    width: 2;
     height: auto;
     padding: 0;
     border: none;
@@ -27,7 +27,9 @@ Button {
 
 #t-complete {
     dock: left;
+    width: 2;
 }
+
 
 #stop {
     dock: left;
