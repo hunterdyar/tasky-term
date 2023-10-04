@@ -1,13 +1,15 @@
-from rich.text import Text
 from textual.app import ComposeResult
 from textual.events import DescendantBlur
 from textual.message import Message
 from textual.widgets import Button, Static, Input, Label
-from textual import on, events
+from textual import on
 
 class TaskCategory(Static):
     header = None
 
+    def __init__(self,header):
+        super().__init__()
+        self.set_header(header)
     def compose(self) -> ComposeResult:
         yield Label(self.header.text)
 
@@ -16,7 +18,6 @@ class TaskCategory(Static):
 
 
 class TaskText(Input):
-    """text"""
     @on(Input.Changed)
     def on_input_changed(self, event: Input.Changed):
         self.focus()  # If we move the mouse we lose focus but not really? odd bugs.
@@ -29,6 +30,10 @@ class TaskText(Input):
 class TaskWidget(Static):
     task = None
     check = None
+
+    def __init__(self, task):
+        super().__init__()
+        self.set_task(task)
 
     class IsUpdated(Message):
         t = None
@@ -46,15 +51,16 @@ class TaskWidget(Static):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "t-complete":
             self.task.complete = not self.task.complete
-            self.add_class("complete") if self.task.complete else self.remove_class("complete")
             self.refresh_complete()
             self.post_message(self.IsUpdated())
 
     def refresh_complete(self) -> None:
         if self.task.complete:
             self.query_one("#t-complete", Button).label = "\[x]"
+            self.add_class("complete")
         else:
             self.query_one("#t-complete", Button).label = "[ ]"
+            self.remove_class("complete")
 
     def refresh_text(self):
         self.query_one("#t-input", TaskText).value = self.task.text

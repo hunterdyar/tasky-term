@@ -29,7 +29,6 @@ class MDList:
 
     # quick reference, presumed unsorted
     categories = []
-
     path = ""
 
     def populate_from_file(self, path):
@@ -43,11 +42,9 @@ class MDList:
                 # this could be a filter later? I want LINQ
                 if item is mdHeader:
                     self.categories.append(item)
-
                 self.items.append(item)
 
     def get_tasks(self):
-
         x = list(filter(lambda x: isinstance(x,mdTask), self.items))
         return x
 
@@ -60,7 +57,10 @@ class MDList:
         # loop through items until category is full
         # x = i if i is task; until end of file or next category
 
-    def add_task(self,completed,text):
+    def remove_task(self, task):
+        self.items.remove(task)
+
+    def add_task(self, completed, text):
         # todo: replace with quicker iteration from end of list
         if len(self.items) == 0:
             new_task = create_task(self, completed, text)
@@ -77,14 +77,12 @@ class MDList:
 
 
     def write_to_file(self, path):
-        print("Write to file, "+str(len(self.items))+" items")
         with open(self.path, 'w', encoding="utf-8") as f:
             t = ""
             for line in self.items:
                 t += line.renderLine() + "\n"
             f.write(t)
             f.close()
-
 
 class mdItem(object):
     # Compose
@@ -96,7 +94,6 @@ class mdItem(object):
         self.parent = parent
 
     def renderLine(self):
-        print("render normal line: "+self.source)
         return self.source
 
     @staticmethod
@@ -114,7 +111,6 @@ class mdHeader(mdItem):
         self.text = source_line[heading:].strip()
 
     def renderLine(self):
-        print("render heading "+str(self.heading) +": "+self.text)
         t = "#" * self.heading
         t += " "+self.text
         return t
@@ -148,10 +144,10 @@ class mdTask(mdItem):
 
 if __name__ == "__main__":
     mdlist = MDList()
-    if(len(sys.argv) == 1):
+    if len(sys.argv) == 1:
         path = "demo.md"
     else:
         path = sys.argv[1]
     mdlist.populate_from_file(path)
-    mdlist.add_task(False, "A new todo! From the file!")
+    mdlist.add_task(False, "Testing! A new todo! From the file!")
     mdlist.write_to_file(path)

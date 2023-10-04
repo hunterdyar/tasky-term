@@ -9,7 +9,7 @@ from textual.binding import Binding
 from textual.widgets import DataTable, Footer, RichLog
 from textual.widgets._data_table import CellDoesNotExist
 
-import md_task_lists
+from playground import md_task_lists
 import TasklistMarkdownRenderer
 
 
@@ -34,7 +34,7 @@ class TableApp(App):
         Binding(key="j", action="down", description="Scroll down", show=False),
         Binding(key="k", action="up", description="Scroll up", show=False),
     ]
-    path = "demo.md"
+    path = "../demo.md"
     md = mistune.create_markdown(renderer=None, plugins=['task_lists'])
     # mistune.import_plugin('md_task_lists.md_task_lists')
     md_render = mistune.create_markdown(renderer=MarkdownRenderer)

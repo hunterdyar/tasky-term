@@ -1,6 +1,7 @@
 ## A Category of tasks.
-- [ ] A task
+- [ ] A taskn
 - [ ] sdfsdfsdfsdfn
 - [x] Something here too.
+- [ ] Another cat
 
 ## another category

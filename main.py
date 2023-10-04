@@ -32,22 +32,20 @@ class TaskyTerm(App):
     def on_mount(self) -> None:
         # md could be stored in globals?
         self.md.populate_from_file(self.path)
-        print('mount'+str(len(self.md.get_tasks())))
         l = self.query_one("#tasklist")
         for t in self.md.items:
             if isinstance(t, markdown_tasks.mdTask):
-                new_task = TaskWidget()
-                new_task.set_task(t)
+                new_task = TaskWidget(t)
                 l.mount(new_task)
             elif isinstance(t, markdown_tasks.mdHeader):
-                new_header = TaskCategory()
-                new_header.set_header(t)
+                new_header = TaskCategory(t)
                 l.mount(new_header)
         self.save()
 
     def action_new_task(self) -> None:
-        new_task = TaskWidget()
-        new_task.set_task(self.md.add_task(False,""))
+        # todo... insert the .mount at appropriate place in list
+        # .mount takes an after property, index.
+        new_task = TaskWidget(self.md.add_task(False,""))
         self.query_one("#tasklist").mount(new_task)
         self.save()
 
@@ -59,6 +57,10 @@ class TaskyTerm(App):
 
     def action_delete_task(self) -> None:
         # we need some way to keep track of which task we have highlighted.
+        #task = selected_widget()
+        pass
+
+    def selected_widget(self):
         pass
 
     def clear(self):
