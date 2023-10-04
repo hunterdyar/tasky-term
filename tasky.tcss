@@ -18,6 +18,12 @@ TaskText:focus {
    text-style: bold;
 }
 
+TaskCategory {
+    padding-top: 1;
+    text-style: bold;
+    border-bottom: solid grey;
+}
+
 Button {
     width: 2;
     height: auto;
@@ -29,7 +35,8 @@ Rule {
     border: none;
     height: 1;
     padding: 0;
-    margin: 0
+    margin: 0;
+    display: none;
 }
 
 #t-complete {
@@ -47,7 +54,7 @@ Rule {
     dock: right;
 }
 
-.complete{
+.complete T{
     text-opacity: 60%;
     text-style: strike;
 }

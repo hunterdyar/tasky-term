@@ -13,6 +13,7 @@ class ListItem(Static):
         self.add_class("deselected")
 
     def select(self):
+        self.scroll_visible()
         self.add_class("selected")
         self.remove_class("deselected")
 
@@ -42,12 +43,9 @@ class TaskWidget(ListItem):
         self.refresh_text()
         self.query_one("#t-input").display = "none"
         self.query_one("#t-input").blur()
-        if(self.edit_on_mount):
-            self.edit()
 
-   # @on(DescendantBlur)
-   # def on_descendant_blur(self, widget):
-      #  self.blur()
+        if self.edit_on_mount:
+            self.edit()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "t-complete":
@@ -66,7 +64,6 @@ class TaskWidget(ListItem):
         self.query_one("#t-input", TextArea).load_text(self.md_item.text)
         self.query_one("#label", Static).update(self.md_item.text)
 
-
     def edit(self):
         inp = self.query_one("#t-input", TextArea)
         inp.display = "block"
@@ -76,10 +73,10 @@ class TaskWidget(ListItem):
 
     def edit_finished(self):
         print("edit complete")
-        inp = self.query_one("#t-input",TextArea)
+        inp = self.query_one("#t-input", TextArea)
         self.md_item.text = inp.text
         self.refresh_text()
-        inp.blur() # free the cursor
+        inp.blur()  # free the cursor
         inp.display = "none"
         self.query_one("#label").display = "block"
         self.post_message(self.IsUpdated())
@@ -88,22 +85,20 @@ class TaskWidget(ListItem):
         self.md_item.complete = not self.md_item.complete
         self.refresh_complete()
 
-    @on(Input.Changed,"#t-input")
+    @on(Input.Changed, "#t-input")
     def on_input_changed(self, m):
         self.task.text = m.value
-
-    @on(Input.Changed,"#t-input")
-    def on_input_submitted(self, m):
-        self.post_message(self.IsUpdated())
 
     def compose(self) -> ComposeResult:
         yield CompleteBox(False, id="t-complete")
         # focus on the new task once it is created, so we can just start typing.
-        yield Static(self.md_item.text,id="label")
+        yield Static(self.md_item.text, id="label")
         yield TaskText(_id="t-input").focus()
+
 
 class CompleteBox(Static):
     complete = False
+
     def __init__(self, complete, id):
         super().__init__()
         self.id = id
@@ -113,9 +108,9 @@ class CompleteBox(Static):
         self.set_complete(self.complete)
 
     def set_complete(self, complete):
-        print("set complete "+str(complete))
+        print("set complete " + str(complete))
         self.complete = complete
-        if(self.complete):
+        if (self.complete):
             self.update("- \[x] ")
         else:
             self.update("- [ ] ")
@@ -133,6 +128,7 @@ class TaskCategory(ListItem):
         if not self.is_first:
             yield Rule()
         yield Label(self.md_item.text)
+
 
 class TaskText(TextArea):
     def __init__(self, _id):
@@ -155,4 +151,3 @@ class TaskText(TextArea):
 
     def on_input_submitted(self):
         self.blur()
-

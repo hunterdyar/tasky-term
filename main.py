@@ -56,12 +56,20 @@ class TaskyTerm(App):
     def action_new_task(self) -> None:
         # todo... insert the .mount at appropriate place in list
         # .mount takes an after property, index.
-        new_task = TaskWidget(self.md.add_task(False, ""),edit_on_mount=True)
-        self.query_one("#tasklist").mount(new_task)
-        self.elements.append(new_task)
+        if len(self.elements) == 0:
+            new_task = TaskWidget(self.md.add_task(False, ""), edit_on_mount=True)
+            self.query_one("#tasklist").mount(new_task)
+            self.elements.append(new_task)
+            # highlight First Task when creating it.
+            self.select_element(new_task)
+            return
+
+        md_item = self.md.insert_task_after_item(self.elements[self.selected].md_item, False,"")
+        new_task = TaskWidget(md_item,edit_on_mount= True)
+        self.query_one("#tasklist").mount(new_task,after=self.elements[self.selected])
+        self.elements.insert(self.selected+1, new_task)
         # highlight First Task when creating it.
         self.select_element(new_task)
-
 
     def save(self):
         self.md.write_to_file(self.path)
