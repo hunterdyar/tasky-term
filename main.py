@@ -1,3 +1,5 @@
+import sys
+
 from textual import on, events
 from textual.app import App, ComposeResult
 from textual.binding import Binding
@@ -15,13 +17,13 @@ class TaskyTerm(App):
         Binding(key="e,enter", action="edit_task", description="Edit"),
         Binding(key="d,r", action="delete_task", description="Delete"),
         Binding(key="space", action="toggle", description="Check", show=True, key_display='_'),
-        Binding(key="j", action="down", description="Scroll down", show=True),
-        Binding(key="k", action="up", description="Scroll up", show=True),
+        Binding(key="j", action="down", description="Scroll down", show=False),
+        Binding(key="k", action="up", description="Scroll up", show=False),
     ]
     selected = 0
     elements = []
     md = markdown_tasks.MDList()
-    path = "demo.md"
+    path = "todo.md"
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
@@ -171,5 +173,11 @@ class TaskyTerm(App):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        path = "todo.md"
+    else:
+        path = sys.argv[1]
+
     app = TaskyTerm()
+    app.path = path
     app.run()

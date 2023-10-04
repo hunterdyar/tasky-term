@@ -34,7 +34,7 @@ class MDList:
     def populate_from_file(self, path):
         self.items.clear()
         self.path = path
-        with open(self.path, encoding="utf-8") as f:
+        with open(self.path, "r", encoding="utf-8") as f:
             self.items.clear()
             data = f.read().splitlines()
             for line in data:
@@ -145,7 +145,7 @@ class mdTask(mdItem):
 if __name__ == "__main__":
     mdlist = MDList()
     if len(sys.argv) == 1:
-        path = "demo.md"
+        path = "todo.md"
     else:
         path = sys.argv[1]
     mdlist.populate_from_file(path)
