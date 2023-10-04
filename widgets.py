@@ -1,8 +1,9 @@
 from textual.app import ComposeResult
 from textual.events import DescendantBlur
 from textual.message import Message
-from textual.widgets import Button, Static, Input, Label
-from textual import on
+from textual.widgets import Button, Static, Input, Label, TextArea
+from textual import on, events
+
 
 class TaskCategory(Static):
     header = None
@@ -17,7 +18,19 @@ class TaskCategory(Static):
         self.header = header
 
 
-class TaskText(Input):
+class TaskText(TextArea):
+    def __init__(self, _id):
+        super().__init__(id=_id)
+        self.show_line_numbers = False
+
+    def _on_key(self, event: events.Key) -> None:
+        if event.key == "enter":
+            event.prevent_default()
+
+    def action_cursor_down(self, select=False):
+        # a different way of preventing multiple lines? we should move cursor to end/beginning of line
+        pass
+
     @on(Input.Changed)
     def on_input_changed(self, event: Input.Changed):
         self.focus()  # If we move the mouse we lose focus but not really? odd bugs.
@@ -76,7 +89,7 @@ class TaskWidget(Static):
     def compose(self) -> ComposeResult:
         yield Button("[ ]", id="t-complete", variant="primary")
         # focus on the new task once it is created, so we can just start typing.
-        yield TaskText(placeholder="...start typing...", id="t-input").focus()
+        yield TaskText(_id="t-input").focus()
 
     def set_task(self, task):
         self.task = task
