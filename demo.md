@@ -1,8 +1,5 @@
 ## A Category of tasks.
-- [ ] Move Saving to tasks.py
-- [x] Rewrite row to avoid textual focus/blur and override by listening to events
-- [x] Another Task.
-- [ ] Another cat
-- [ ] 
 
-## another category
+- [ ] another edit. More text.e 
+- [ ] We need to go deeper. edit.
+- [x] This is a task..

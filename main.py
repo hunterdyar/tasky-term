@@ -15,12 +15,12 @@ class TaskyTerm(App):
         Binding(key="e,enter", action="edit_task", description="Edit"),
         Binding(key="d,r", action="delete_task", description="Delete"),
         Binding(key="space", action="toggle", description="Check", show=True, key_display='_'),
-        Binding(key="j", action="down", description="Scroll down", show=False),
-        Binding(key="k", action="up", description="Scroll up", show=False),
+        Binding(key="j", action="down", description="Scroll down", show=True),
+        Binding(key="k", action="up", description="Scroll up", show=True),
     ]
     selected = 0
+    elements = []
     md = markdown_tasks.MDList()
-    tokens = None
     path = "demo.md"
 
     def compose(self) -> ComposeResult:
@@ -33,21 +33,35 @@ class TaskyTerm(App):
         # md could be stored in globals?
         self.md.populate_from_file(self.path)
         l = self.query_one("#tasklist")
+        is_first_cat = True
         for t in self.md.items:
             if isinstance(t, markdown_tasks.mdTask):
                 new_task = TaskWidget(t)
                 l.mount(new_task)
+                self.elements.append(new_task)
             elif isinstance(t, markdown_tasks.mdHeader):
-                new_header = TaskCategory(t)
+                new_header = TaskCategory(t, is_first_cat)
                 l.mount(new_header)
+                self.elements.append(new_header)
+                is_first_cat = False
+
+        if len(self.elements) > 0:
+            self.selected_list_item().select()
+
+        for e in self.elements[1:]:
+            e.deselect()
+
         self.save()
 
     def action_new_task(self) -> None:
         # todo... insert the .mount at appropriate place in list
         # .mount takes an after property, index.
-        new_task = TaskWidget(self.md.add_task(False,""))
+        new_task = TaskWidget(self.md.add_task(False, ""),edit_on_mount=True)
         self.query_one("#tasklist").mount(new_task)
-        self.save()
+        self.elements.append(new_task)
+        # highlight First Task when creating it.
+        self.select_element(new_task)
+
 
     def save(self):
         self.md.write_to_file(self.path)
@@ -55,21 +69,98 @@ class TaskyTerm(App):
     def on_key(self, event: events.Key) -> None:
         pass
 
-    def action_delete_task(self) -> None:
-        # we need some way to keep track of which task we have highlighted.
-        #task = selected_widget()
-        pass
+    def action_edit_task(self):
+        if len(self.elements) == 0:
+            return
+        list_item = self.selected_list_item()
 
-    def selected_widget(self):
-        pass
+        if isinstance(list_item,TaskWidget):
+            list_item.edit()
+
+    def action_toggle(self):
+        if len(self.elements) == 0:
+            return
+        list_item = self.selected_list_item()
+
+        if isinstance(list_item, TaskWidget):
+            list_item.toggle()
+            self.save()
+
+    def action_exit(self):
+        self.save()
+        quit()
+
+    def action_delete_task(self) -> None:
+        if len(self.elements) == 0:
+            return
+        # we need some way to keep track of which task we have highlighted.
+        list_item = self.selected_list_item()
+        list_item.deselect()  # i guess?
+        self.delete_item(list_item)
+
+    def action_up(self):
+        self.scroll_selected(-1)
+
+    def action_down(self):
+        self.scroll_selected(1)
+
+    def scroll_selected(self, delta):
+        l = len(self.elements)
+        if l == 0:
+            return
+        prev = self.selected
+        self.selected = self.selected + delta
+
+        # Wrap
+        if self.selected < 0:
+            self.selected = l - 1
+        if self.selected >= l:
+            self.selected = 0
+
+        # No change (only one item?)
+        if self.selected == prev:
+            return
+
+        # deselect previous
+        self.elements[prev].deselect()
+        # select new
+        self.selected_list_item().select()
+
+    def select_element(self, task):
+        index = self.elements.index(task)
+        self.elements[self.selected].deselect()
+        self.selected = index
+        self.elements[self.selected].select()
+
+    # could be a lamda?
+    def selected_list_item(self):
+        return self.elements[self.selected]
 
     def clear(self):
         # delete all tasks from #tasklist
         pass
 
-    def on_task_widget_is_updated(self,message: TaskWidget.IsUpdated)->None:
+    def delete_item(self, list_item):
+        item = list_item.get_item()
+        # remove from internal list, remove the item from the DOM, remove the task from the md ("database")
+        self.elements.remove(list_item)
+        list_item.remove()
+        self.md.remove_item(item)
+        # update selected
+        #self.selected -= 1
+        if self.selected >= len(self.elements):
+            self.selected -= 1
+        if self.selected < 0:
+            self.selected = 0
+        if 0 <= self.selected < len(self.elements):
+            self.elements[self.selected].select()
+
+        self.save()
+
+    def on_task_widget_is_updated(self, message: TaskWidget.IsUpdated) -> None:
         print("dirty")
         self.save()
+
 
 if __name__ == "__main__":
     app = TaskyTerm()

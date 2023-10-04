@@ -57,7 +57,7 @@ class MDList:
         # loop through items until category is full
         # x = i if i is task; until end of file or next category
 
-    def remove_task(self, task):
+    def remove_item(self, task):
         self.items.remove(task)
 
     def add_task(self, completed, text):

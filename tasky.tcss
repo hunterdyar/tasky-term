@@ -1,6 +1,6 @@
 Task {
     layout: horizontal;
-    background: $boost;
+    background: black;
     height: 1;
     margin: 0;
     min-width: 50;
@@ -25,9 +25,16 @@ Button {
     border: none;
 }
 
+Rule {
+    border: none;
+    height: 1;
+    padding: 0;
+    margin: 0
+}
+
 #t-complete {
     dock: left;
-    width: 2;
+    width: 6;
 }
 
 
@@ -39,7 +46,15 @@ Button {
 #reset {
     dock: right;
 }
-.complete TaskText{
+
+.complete{
     text-opacity: 60%;
     text-style: strike;
+}
+
+.selected {
+    background: orange 50%
+}
+.deselected {
+    background: orange 0%
 }
