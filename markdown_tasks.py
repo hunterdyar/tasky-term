@@ -133,7 +133,6 @@ class mdTask(mdItem):
 
     def renderLine(self):
         t = "- [x] " if self.complete else "- [ ] "
-        print("render task: "+t+self.text)
         return t+self.text
 
     @staticmethod

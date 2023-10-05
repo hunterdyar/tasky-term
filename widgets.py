@@ -54,11 +54,14 @@ class TaskWidget(ListItem):
             self.post_message(self.IsUpdated())
 
     def refresh_complete(self) -> None:
-        self.query_one("#t-complete", CompleteBox).set_complete(self.md_item.complete)
+        box = self.query_one("#t-complete", CompleteBox)
+        box.set_complete(self.md_item.complete)
         if self.md_item.complete:
             self.add_class("complete")
+            self.query_one("#label", Static).add_class("complete")
         else:
             self.remove_class("complete")
+            self.query_one("#label", Static).remove_class("complete")
 
     def refresh_text(self):
         self.query_one("#t-input", TextArea).load_text(self.md_item.text)
@@ -72,7 +75,6 @@ class TaskWidget(ListItem):
         self.query_one("#label").display = "none"
 
     def edit_finished(self):
-        print("edit complete")
         inp = self.query_one("#t-input", TextArea)
         self.md_item.text = inp.text
         self.refresh_text()
@@ -112,8 +114,10 @@ class CompleteBox(Static):
         self.complete = complete
         if (self.complete):
             self.update("- \[x] ")
+            self.add_class("complete")
         else:
             self.update("- [ ] ")
+            self.remove_class("complete")
 
 
 class TaskCategory(ListItem):

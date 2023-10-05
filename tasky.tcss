@@ -14,6 +14,10 @@ TaskText {
     border: none;
 }
 
+TaskWidget Static{
+    text-style: strike;
+}
+
 TaskText:focus {
    text-style: bold;
 }
@@ -54,7 +58,7 @@ Rule {
     dock: right;
 }
 
-.complete T{
+.complete{
     text-opacity: 60%;
     text-style: strike;
 }

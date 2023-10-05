@@ -1,2 +1,4 @@
-- [ ] Making a new todo
-- [ ] Making another todo.
+- [x] Making a new todo
+- [x] Making another todo.
+- [x] Blender Things.
+- [x] Time to get to work!
