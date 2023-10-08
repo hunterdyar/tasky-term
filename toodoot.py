@@ -5,8 +5,9 @@ from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import ScrollableContainer
 from textual.widgets import Header, Footer
-import markdown_tasks
-from widgets import TaskWidget, TaskCategory
+
+import toodoot.markdown_tasks
+from toodoot.widgets import TaskWidget, TaskCategory
 
 
 class TaskyTerm(App):
