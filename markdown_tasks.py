@@ -34,8 +34,9 @@ class MDList:
     def populate_from_file(self, path):
         self.items.clear()
         self.path = path
-        with open(self.path, "r", encoding="utf-8") as f:
+        with open(self.path, "a+", encoding="utf-8") as f:
             self.items.clear()
+            f.seek(0)
             data = f.read().splitlines()
             for line in data:
                 item = get_md_item_from_line(self, line.strip())

@@ -6,9 +6,8 @@ from textual.binding import Binding
 from textual.containers import ScrollableContainer
 from textual.widgets import Header, Footer
 
-import toodoot.markdown_tasks
-from toodoot.widgets import TaskWidget, TaskCategory
-
+import markdown_tasks
+from widgets import TaskWidget, TaskCategory
 
 class TaskyTerm(App):
     CSS_PATH = "tasky.tcss"
