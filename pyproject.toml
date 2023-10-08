@@ -1,0 +1,21 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "toodoot"
+authors = [{name = "Hunter Dyar", email = "me@hdyar.com"}]
+license = {file = "LICENSE"}
+classifiers = ["License :: OSI Approved :: MIT License"]
+requires = [
+    "textual >=0.38.1",
+]
+version = "0.0.1"
+description = "Manage todos with markdown formatting from a convenient TUI"
+
+[project.urls]
+Home = "https://github.com/hunterdyar/toodoot"
+Source = "https://github.com/hunterdyar/toodoot"
+
+[project.scripts]
+toodoot = "toodoot"

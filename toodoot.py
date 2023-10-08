@@ -1,10 +1,10 @@
 import sys
 
-from textual import on, events
+from textual import events
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import ScrollableContainer
-from textual.widgets import Header, Footer, Button, Static, Input
+from textual.widgets import Header, Footer
 import markdown_tasks
 from widgets import TaskWidget, TaskCategory
 
@@ -66,10 +66,10 @@ class TaskyTerm(App):
             self.select_element(new_task)
             return
 
-        md_item = self.md.insert_task_after_item(self.elements[self.selected].md_item, False,"")
-        new_task = TaskWidget(md_item,edit_on_mount= True)
-        self.query_one("#tasklist").mount(new_task,after=self.elements[self.selected])
-        self.elements.insert(self.selected+1, new_task)
+        md_item = self.md.insert_task_after_item(self.elements[self.selected].md_item, False, "")
+        new_task = TaskWidget(md_item, edit_on_mount=True)
+        self.query_one("#tasklist").mount(new_task, after=self.elements[self.selected])
+        self.elements.insert(self.selected + 1, new_task)
         # highlight First Task when creating it.
         self.select_element(new_task)
 
@@ -84,7 +84,7 @@ class TaskyTerm(App):
             return
         list_item = self.selected_list_item()
 
-        if isinstance(list_item,TaskWidget):
+        if isinstance(list_item, TaskWidget):
             list_item.edit()
 
     def action_toggle(self):
@@ -157,7 +157,7 @@ class TaskyTerm(App):
         list_item.remove()
         self.md.remove_item(item)
         # update selected
-        #self.selected -= 1
+        # self.selected -= 1
         if self.selected >= len(self.elements):
             self.selected -= 1
         if self.selected < 0:
@@ -173,6 +173,17 @@ class TaskyTerm(App):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        path = "todo.md"
+    else:
+        path = sys.argv[1]
+
+    app = TaskyTerm()
+    app.path = path
+    app.run()
+
+
+def main():
     if len(sys.argv) == 1:
         path = "todo.md"
     else:
