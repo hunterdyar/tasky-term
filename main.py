@@ -17,8 +17,8 @@ class TaskyTerm(App):
         Binding(key="e,enter", action="edit_task", description="Edit"),
         Binding(key="d,r", action="delete_task", description="Delete"),
         Binding(key="space", action="toggle", description="Check", show=True, key_display='_'),
-        Binding(key="j", action="down", description="Scroll down", show=False),
-        Binding(key="k", action="up", description="Scroll up", show=False),
+        Binding(key="j,down,s", action="down", description="Scroll down", show=False),
+        Binding(key="k,up,w", action="up", description="Scroll up", show=False),
     ]
     selected = 0
     elements = []
