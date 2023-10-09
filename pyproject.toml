@@ -7,7 +7,7 @@ name = "toodoot"
 authors = [{name = "Hunter Dyar", email = "me@hdyar.com"}]
 license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: MIT License"]
-version = "0.0.5"
+version = "0.0.6"
 description = "Manage todos with markdown formatting from a convenient TUI"
 readme = "readme.md"
 
