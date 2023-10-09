@@ -6,8 +6,10 @@ from textual.binding import Binding
 from textual.containers import ScrollableContainer
 from textual.widgets import Header, Footer
 
-import markdown_tasks
-from widgets import TaskWidget, TaskCategory
+
+import markdowntasks
+from widgets import TaskWidget
+from widgets import TaskCategory
 
 class TaskyTerm(App):
     CSS_PATH = "tasky.tcss"
@@ -22,7 +24,7 @@ class TaskyTerm(App):
     ]
     selected = 0
     elements = []
-    md = markdown_tasks.MDList()
+    md = markdowntasks.MDList()
     path = "todo.md"
 
     def compose(self) -> ComposeResult:
@@ -37,11 +39,11 @@ class TaskyTerm(App):
         l = self.query_one("#tasklist")
         is_first_cat = True
         for t in self.md.items:
-            if isinstance(t, markdown_tasks.mdTask):
+            if isinstance(t, markdowntasks.mdTask):
                 new_task = TaskWidget(t)
                 l.mount(new_task)
                 self.elements.append(new_task)
-            elif isinstance(t, markdown_tasks.mdHeader):
+            elif isinstance(t, markdowntasks.mdHeader):
                 new_header = TaskCategory(t, is_first_cat)
                 l.mount(new_header)
                 self.elements.append(new_header)
