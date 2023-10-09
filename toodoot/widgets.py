@@ -139,7 +139,7 @@ class TaskText(TextArea):
         self.show_line_numbers = False
 
     def _on_key(self, event: events.Key) -> None:
-        if event.key == "enter":
+        if event.key == "enter" or event.key == "escape":
             self.parent.edit_finished()
             event.prevent_default()
 
