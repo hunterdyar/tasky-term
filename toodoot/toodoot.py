@@ -6,10 +6,10 @@ from textual.binding import Binding
 from textual.containers import ScrollableContainer
 from textual.widgets import Header, Footer
 
-
 import markdowntasks
 from widgets import TaskWidget
 from widgets import TaskCategory
+
 
 class TaskyTerm(App):
     CSS_PATH = "tasky.tcss"
@@ -100,7 +100,7 @@ class TaskyTerm(App):
 
     def action_exit(self):
         self.save()
-        quit()
+        self.exit()
 
     def action_delete_task(self) -> None:
         if len(self.elements) == 0:
@@ -174,17 +174,6 @@ class TaskyTerm(App):
         self.save()
 
 
-if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        path = "todo.md"
-    else:
-        path = sys.argv[1]
-
-    app = TaskyTerm()
-    app.path = path
-    app.run()
-
-
 def main():
     if len(sys.argv) == 1:
         path = "todo.md"
@@ -194,3 +183,7 @@ def main():
     app = TaskyTerm()
     app.path = path
     app.run()
+
+
+if __name__ == "__main__":
+    main()

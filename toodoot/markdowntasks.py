@@ -44,6 +44,7 @@ class MDList:
                 if item is mdHeader:
                     self.categories.append(item)
                 self.items.append(item)
+            return
 
     def get_tasks(self):
         x = list(filter(lambda x: isinstance(x,mdTask), self.items))
@@ -78,12 +79,14 @@ class MDList:
 
 
     def write_to_file(self, path):
+        self.path = path
         with open(self.path, 'w', encoding="utf-8") as f:
             t = ""
             for line in self.items:
                 t += line.renderLine() + "\n"
             f.write(t)
             f.close()
+            return
 
 class mdItem(object):
     # Compose
