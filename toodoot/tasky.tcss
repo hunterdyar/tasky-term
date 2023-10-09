@@ -14,10 +14,6 @@ TaskText {
     border: none;
 }
 
-TaskWidget Static{
-    text-style: strike;
-}
-
 TaskText:focus {
    text-style: bold;
 }
@@ -60,6 +56,9 @@ Rule {
 
 .complete{
     text-opacity: 60%;
+}
+
+#t-label.complete{
     text-style: strike;
 }
 
