@@ -1,0 +1,12 @@
+LICENSE
+MANIFEST.in
+pyproject.toml
+readme.md
+src/markdowntasks.py
+src/toodoot.py
+src/widgets.py
+src/toodoot.egg-info/PKG-INFO
+src/toodoot.egg-info/SOURCES.txt
+src/toodoot.egg-info/dependency_links.txt
+src/toodoot.egg-info/entry_points.txt
+src/toodoot.egg-info/top_level.txt

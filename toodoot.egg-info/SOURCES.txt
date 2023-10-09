@@ -1,0 +1,14 @@
+LICENSE
+pyproject.toml
+readme.md
+setup.py
+toodoot/__init__.py
+toodoot/markdowntasks.py
+toodoot/tasky.tcss
+toodoot/toodoot.py
+toodoot/widgets.py
+toodoot.egg-info/PKG-INFO
+toodoot.egg-info/SOURCES.txt
+toodoot.egg-info/dependency_links.txt
+toodoot.egg-info/entry_points.txt
+toodoot.egg-info/top_level.txt

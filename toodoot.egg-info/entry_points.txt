@@ -1,0 +1,2 @@
+[console_scripts]
+toodoot = toodoot.toodoot:main
