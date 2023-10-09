@@ -1,5 +1,4 @@
 from textual.app import ComposeResult
-from textual.events import DescendantBlur
 from textual.message import Message
 from textual.widgets import Button, Static, Input, Label, TextArea, Rule
 from textual import on, events
@@ -58,21 +57,21 @@ class TaskWidget(ListItem):
         box.set_complete(self.md_item.complete)
         if self.md_item.complete:
             self.add_class("complete")
-            self.query_one("#label", Static).add_class("complete")
+            self.query_one("#t-label", Static).add_class("complete")
         else:
             self.remove_class("complete")
-            self.query_one("#label", Static).remove_class("complete")
+            self.query_one("#t-label", Static).remove_class("complete")
 
     def refresh_text(self):
         self.query_one("#t-input", TextArea).load_text(self.md_item.text)
-        self.query_one("#label", Static).update(self.md_item.text)
+        self.query_one("#t-label", Static).update(self.md_item.text)
 
     def edit(self):
         inp = self.query_one("#t-input", TextArea)
         inp.display = "block"
         inp.focus()
         inp.action_cursor_line_end()
-        self.query_one("#label").display = "none"
+        self.query_one("#t-label").display = "none"
 
     def edit_finished(self):
         inp = self.query_one("#t-input", TextArea)
@@ -80,7 +79,7 @@ class TaskWidget(ListItem):
         self.refresh_text()
         inp.blur()  # free the cursor
         inp.display = "none"
-        self.query_one("#label").display = "block"
+        self.query_one("#t-label").display = "block"
         self.post_message(self.IsUpdated())
 
     def toggle(self):
@@ -94,7 +93,7 @@ class TaskWidget(ListItem):
     def compose(self) -> ComposeResult:
         yield CompleteBox(False, id="t-complete")
         # focus on the new task once it is created, so we can just start typing.
-        yield Static(self.md_item.text, id="label")
+        yield Static(self.md_item.text, id="t-label")
         yield TaskText(_id="t-input").focus()
 
 
@@ -140,7 +139,7 @@ class TaskText(TextArea):
         self.show_line_numbers = False
 
     def _on_key(self, event: events.Key) -> None:
-        if event.key == "enter":
+        if event.key == "enter" or event.key == "escape":
             self.parent.edit_finished()
             event.prevent_default()
 
