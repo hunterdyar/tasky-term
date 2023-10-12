@@ -1,3 +1,4 @@
+import os.path
 import sys
 
 from textual import events
@@ -26,6 +27,8 @@ class TaskyTerm(App):
     elements = []
     md = markdowntasks.MDList()
     path = "todo.md"
+    file_needs_created = False
+    pathObj = None
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
@@ -35,6 +38,7 @@ class TaskyTerm(App):
 
     def on_mount(self) -> None:
         # md could be stored in globals?
+        self.file_needs_created = os.path.isfile(self.path)
         self.md.populate_from_file(self.path)
         l = self.query_one("#tasklist")
         is_first_cat = True
@@ -183,6 +187,11 @@ def main():
     app = TaskyTerm()
     app.path = path
     app.run()
+    if app.file_needs_created:
+        print("Toodoot Edited "+str(app.pathObj))
+    else:
+        print("Toodoot Created "+str(app.pathObj))
+
 
 
 if __name__ == "__main__":
