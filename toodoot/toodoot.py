@@ -1,5 +1,5 @@
 import os.path
-import sys, pathlib
+import sys
 
 from textual import events
 from textual.app import App, ComposeResult
@@ -38,7 +38,6 @@ class TaskyTerm(App):
 
     def on_mount(self) -> None:
         # md could be stored in globals?
-        self.pathObj = pathlib.Path(self.path)
         self.file_needs_created = os.path.isfile(self.path)
         self.md.populate_from_file(self.path)
         l = self.query_one("#tasklist")
